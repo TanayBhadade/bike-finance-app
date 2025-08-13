@@ -1,5 +1,5 @@
-// --- Bike Finance App - Backend Server (Deployment Ready) ---
-// This version is configured to connect to the live Render database.
+// --- Bike Finance App - Backend Server (Numeric Fix) ---
+// This version fixes a bug where empty strings were sent for numeric fields.
 
 const express = require('express');
 const { Pool } = require('pg');
@@ -11,21 +11,55 @@ const PORT = process.env.PORT || 3000;
 // We now use the live database URL from Render.
 // The 'ssl' property is required for secure connections to Render's database.
 const pool = new Pool({
-    connectionString: "postgresql://tanay:7sx7rmdq0eguo7QIDcT2mPZzcvkrWxLu@dpg-d2e9a5re5dus73fnkdr0-a.oregon-postgres.render.com/bike_finance_db",
+    connectionString: "postgresql://tanay:7sx7rmdq0eguo7QIDcT2mPZzcvkrWxLu@dpg-d2e9a5re5dus73fnkdr0-a.oregon-postgres.render.com/bike_finance_db", // <-- MAKE SURE THIS IS YOUR LIVE URL
     ssl: {
         rejectUnauthorized: false
     }
 });
 
-
 const app = express();
-// REMOVED: const pool = new Pool(dbConfig); - It's now defined above.
 
 app.use(cors());
 app.use(express.json());
 
+// --- UPDATED POST A NEW CUSTOMER ENDPOINT ---
+app.post('/api/customers', async (req, res) => {
+    try {
+        const {
+            full_name, mobile_number, email, permanent_address, current_address,
+            aadhaar_number, pan_card, driving_license, occupation,
+            monthly_income, // This can be an empty string
+            employer_details
+        } = req.body;
+
+        // Convert empty string for monthly_income to null, otherwise keep its value
+        const incomeValue = monthly_income === '' ? null : monthly_income;
+
+        const newCustomerQuery = `
+            INSERT INTO customers (
+                full_name, mobile_number, email, permanent_address, current_address,
+                aadhaar_number, pan_card, driving_license, occupation, monthly_income, employer_details
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+            RETURNING *;
+        `;
+        const values = [
+            full_name, mobile_number, email, permanent_address, current_address,
+            aadhaar_number, pan_card, driving_license, occupation,
+            incomeValue, // Use the corrected value here
+            employer_details
+        ];
+        const result = await pool.query(newCustomerQuery, values);
+        res.status(201).json({ message: 'Customer added successfully!', customer: result.rows[0] });
+    } catch (error) {
+        console.error('Error adding customer:', error);
+        if (error.code === '23505') return res.status(409).json({ message: `A customer with this ${error.constraint.split('_')[1]} already exists.` });
+        res.status(500).json({ message: 'An error occurred while adding the customer.' });
+    }
+});
+
+
 // --- All other endpoints remain the same ---
-// ... (GET/POST customers, GET/POST loans, etc.) ...
+// ... (GET customers, GET/POST loans, etc.) ...
 // GET all customers
 app.get('/api/customers', async (req, res) => {
     try {
@@ -42,20 +76,6 @@ app.get('/api/customers', async (req, res) => {
     } catch (error) {
         console.error('Error fetching customers:', error);
         res.status(500).json({ message: 'An error occurred while fetching customers.' });
-    }
-});
-// POST a new customer
-app.post('/api/customers', async (req, res) => {
-    try {
-        const { full_name, mobile_number, email, permanent_address, current_address, aadhaar_number, pan_card, driving_license, occupation, monthly_income, employer_details } = req.body;
-        const newCustomerQuery = `INSERT INTO customers (full_name, mobile_number, email, permanent_address, current_address, aadhaar_number, pan_card, driving_license, occupation, monthly_income, employer_details) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *;`;
-        const values = [full_name, mobile_number, email, permanent_address, current_address, aadhaar_number, pan_card, driving_license, occupation, monthly_income, employer_details];
-        const result = await pool.query(newCustomerQuery, values);
-        res.status(201).json({ message: 'Customer added successfully!', customer: result.rows[0] });
-    } catch (error) {
-        console.error('Error adding customer:', error);
-        if (error.code === '23505') return res.status(409).json({ message: `A customer with this ${error.constraint.split('_')[1]} already exists.` });
-        res.status(500).json({ message: 'An error occurred while adding the customer.' });
     }
 });
 // GET all loans
@@ -240,12 +260,13 @@ app.put('/api/customers/:id', async (req, res) => {
     const { id } = req.params;
     try {
         const { full_name, mobile_number, email, permanent_address, current_address, occupation, monthly_income, employer_details } = req.body;
+        const incomeValue = monthly_income === '' ? null : monthly_income;
         const updateQuery = `
             UPDATE customers
             SET full_name = $1, mobile_number = $2, email = $3, permanent_address = $4, current_address = $5, occupation = $6, monthly_income = $7, employer_details = $8, updated_at = NOW()
             WHERE id = $9 RETURNING *;
         `;
-        const values = [full_name, mobile_number, email, permanent_address, current_address, occupation, monthly_income, employer_details, id];
+        const values = [full_name, mobile_number, email, permanent_address, current_address, occupation, incomeValue, employer_details, id];
         const { rows } = await pool.query(updateQuery, values);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'Customer not found.' });
