@@ -1,8 +1,8 @@
-// --- CreateLoanForm Component (Deployment Ready) ---
-// This version uses the live API_URL.
+// --- CreateLoanForm Component (Modernized UI) ---
+// This version uses the new card-based layout.
 
 import React, { useState } from 'react';
-import API_URL from './apiConfig'; // Import the live API URL
+import API_URL from './apiConfig';
 
 function CreateLoanForm({ customer, setView }) {
   const [formData, setFormData] = useState({
@@ -31,7 +31,6 @@ function CreateLoanForm({ customer, setView }) {
     setMessage('');
     setIsError(false);
     try {
-      // Use the live API_URL in the fetch call
       const response = await fetch(`${API_URL}/api/loans`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -41,8 +40,7 @@ function CreateLoanForm({ customer, setView }) {
       if (!response.ok) throw new Error(result.message || 'Something went wrong');
       setMessage(result.message);
       setTimeout(() => setView('listLoans'), 2000);
-    } catch (error) {
-      setMessage(error.message);
+    } catch (error)      setMessage(error.message);
       setIsError(true);
     }
   };

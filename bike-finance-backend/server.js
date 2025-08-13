@@ -1,17 +1,17 @@
-// --- Bike Finance App - Backend Server (Numeric Fix) ---
-// This version fixes a bug where empty strings were sent for numeric fields.
+// --- Bike Finance App - Backend Server (Environment Variables) ---
+// This version uses environment variables for the database connection string for security and portability.
 
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
+require('dotenv').config(); // This line loads the .env file
 
 const PORT = process.env.PORT || 3000;
 
 // --- UPDATED DATABASE CONFIGURATION ---
-// We now use the live database URL from Render.
-// The 'ssl' property is required for secure connections to Render's database.
+// The connection string is now loaded from the .env file (process.env.DATABASE_URL)
 const pool = new Pool({
-    connectionString: "postgresql://tanay:7sx7rmdq0eguo7QIDcT2mPZzcvkrWxLu@dpg-d2e9a5re5dus73fnkdr0-a.oregon-postgres.render.com/bike_finance_db", // <-- MAKE SURE THIS IS YOUR LIVE URL
+    connectionString: process.env.DATABASE_URL,
     ssl: {
         rejectUnauthorized: false
     }
@@ -22,7 +22,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// --- UPDATED POST A NEW CUSTOMER ENDPOINT ---
+// --- All other endpoints remain the same ---
+// ... (GET/POST customers, GET/POST loans, etc.) ...
+// POST a new customer
 app.post('/api/customers', async (req, res) => {
     try {
         const {
@@ -56,10 +58,6 @@ app.post('/api/customers', async (req, res) => {
         res.status(500).json({ message: 'An error occurred while adding the customer.' });
     }
 });
-
-
-// --- All other endpoints remain the same ---
-// ... (GET customers, GET/POST loans, etc.) ...
 // GET all customers
 app.get('/api/customers', async (req, res) => {
     try {
