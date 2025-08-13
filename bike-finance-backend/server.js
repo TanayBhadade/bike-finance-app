@@ -1,5 +1,5 @@
-// --- Bike Finance App - Backend Server (Edit Customer) ---
-// This version adds a new endpoint to edit an existing customer's details.
+// --- Bike Finance App - Backend Server (Deployment Ready) ---
+// This version is configured to connect to the live Render database.
 
 const express = require('express');
 const { Pool } = require('pg');
@@ -7,22 +7,25 @@ const cors = require('cors');
 
 const PORT = process.env.PORT || 3000;
 
-const dbConfig = {
-    user: 'postgres',
-    host: 'localhost',
-    database: 'bike_finance_db',
-    password: 'tanay', // <-- MAKE SURE THIS IS YOUR ACTUAL PASSWORD
-    port: 2121,
-};
+// --- UPDATED DATABASE CONFIGURATION ---
+// We now use the live database URL from Render.
+// The 'ssl' property is required for secure connections to Render's database.
+const pool = new Pool({
+    connectionString: "postgresql://tanay:7sx7rmdq0eguo7QIDcT2mPZzcvkrWxLu@dpg-d2e9a5re5dus73fnkdr0-a.oregon-postgres.render.com/bike_finance_db",
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
+
 
 const app = express();
-const pool = new Pool(dbConfig);
+// REMOVED: const pool = new Pool(dbConfig); - It's now defined above.
 
 app.use(cors());
 app.use(express.json());
 
 // --- All other endpoints remain the same ---
-// ... (code for other endpoints is unchanged) ...
+// ... (GET/POST customers, GET/POST loans, etc.) ...
 // GET all customers
 app.get('/api/customers', async (req, res) => {
     try {
@@ -232,49 +235,30 @@ app.get('/api/noc/:loan_id', async (req, res) => {
         res.status(500).json({ message: 'An error occurred while fetching NOC data.' });
     }
 });
-
-
-// --- NEW FEATURE: EDIT CUSTOMER ---
+// EDIT a customer
 app.put('/api/customers/:id', async (req, res) => {
     const { id } = req.params;
     try {
-        const {
-            full_name, mobile_number, email, permanent_address, current_address,
-            occupation, monthly_income, employer_details
-        } = req.body;
-
-        // We don't allow editing of Aadhaar or PAN for security/simplicity.
+        const { full_name, mobile_number, email, permanent_address, current_address, occupation, monthly_income, employer_details } = req.body;
         const updateQuery = `
             UPDATE customers
-            SET 
-                full_name = $1, mobile_number = $2, email = $3, permanent_address = $4,
-                current_address = $5, occupation = $6, monthly_income = $7, employer_details = $8,
-                updated_at = NOW()
-            WHERE id = $9
-            RETURNING *;
+            SET full_name = $1, mobile_number = $2, email = $3, permanent_address = $4, current_address = $5, occupation = $6, monthly_income = $7, employer_details = $8, updated_at = NOW()
+            WHERE id = $9 RETURNING *;
         `;
-        const values = [
-            full_name, mobile_number, email, permanent_address, current_address,
-            occupation, monthly_income, employer_details, id
-        ];
-
+        const values = [full_name, mobile_number, email, permanent_address, current_address, occupation, monthly_income, employer_details, id];
         const { rows } = await pool.query(updateQuery, values);
-
         if (rows.length === 0) {
             return res.status(404).json({ message: 'Customer not found.' });
         }
-
         res.status(200).json({ message: 'Customer updated successfully!', customer: rows[0] });
-
     } catch (error) {
         console.error('Error updating customer:', error);
-        if (error.code === '23505') { // Handle duplicate mobile/email
+        if (error.code === '23505') {
             return res.status(409).json({ message: `Another customer with this mobile or email already exists.` });
         }
         res.status(500).json({ message: 'An error occurred while updating the customer.' });
     }
 });
-
 
 // Start the Server
 app.listen(PORT, () => {
