@@ -1,8 +1,10 @@
-// --- CustomerList Component (with Clickable Name) ---
+// --- CustomerList Component (Deployment Ready) ---
+// This version uses the live API_URL.
 
 import React, { useState, useEffect } from 'react';
+import API_URL from './apiConfig'; // Import the live API URL
 
-function CustomerList({ onSelectCustomer, onViewProfile }) { // Add new prop
+function CustomerList({ onSelectCustomer, onViewProfile }) {
   const [customers, setCustomers] = useState([]);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -11,7 +13,8 @@ function CustomerList({ onSelectCustomer, onViewProfile }) { // Add new prop
     const delayDebounceFn = setTimeout(() => {
       const fetchCustomers = async () => {
         try {
-          const response = await fetch(`/api/customers?search=${searchTerm}`);
+          // Use the live API_URL in the fetch call
+          const response = await fetch(`${API_URL}/api/customers?search=${searchTerm}`);
           if (!response.ok) throw new Error('Network response was not ok');
           const data = await response.json();
           setCustomers(data);
@@ -56,7 +59,6 @@ function CustomerList({ onSelectCustomer, onViewProfile }) { // Add new prop
               <tr key={customer.id}>
                 <td>{customer.id}</td>
                 <td>
-                  {/* Make the name a clickable link */}
                   <a href="#" onClick={(e) => { e.preventDefault(); onViewProfile(customer.id); }} className="profile-link">
                     {customer.full_name}
                   </a>

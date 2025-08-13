@@ -1,7 +1,8 @@
-// --- Dashboard Component (Upgraded UI) ---
-// This version has a more professional and modern look and feel.
+// --- Dashboard Component (Deployment Ready) ---
+// This version uses the live API_URL.
 
 import React, { useState, useEffect } from 'react';
+import API_URL from './apiConfig'; // Import the live API URL
 
 // A simple SVG icon component for the cards
 const StatIcon = ({ children }) => (
@@ -20,7 +21,8 @@ function Dashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await fetch('/api/dashboard');
+        // Use the live API_URL in the fetch call
+        const response = await fetch(`${API_URL}/api/dashboard`);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }

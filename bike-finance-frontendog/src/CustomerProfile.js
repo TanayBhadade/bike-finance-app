@@ -1,7 +1,8 @@
-// --- CustomerProfile Component (Upgraded UI) ---
-// This version uses a more professional and visual two-column layout.
+// --- CustomerProfile Component (Deployment Ready) ---
+// This version uses the live API_URL.
 
-import React, {useState,useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
+import API_URL from './apiConfig'; // Import the live API URL
 
 function CustomerProfile({ customerId, setView, onEditCustomer }) {
   const [profile, setProfile] = useState(null);
@@ -12,7 +13,8 @@ function CustomerProfile({ customerId, setView, onEditCustomer }) {
     if (!customerId) return;
     const fetchProfile = async () => {
       try {
-        const response = await fetch(`/api/customer/${customerId}`);
+        // Use the live API_URL in the fetch call
+        const response = await fetch(`${API_URL}/api/customer/${customerId}`);
         if (!response.ok) throw new Error('Failed to fetch customer profile.');
         const data = await response.json();
         setProfile(data);
@@ -46,10 +48,8 @@ function CustomerProfile({ customerId, setView, onEditCustomer }) {
             <button onClick={() => setView('listCustomers')} className="action-btn back-btn">Back to List</button>
         </div>
       </div>
-
       <div className="profile-grid-new">
         <div className="profile-main-content">
-            {/* Loan & Vehicle Details Card */}
             {loan && vehicle && (
               <div className="profile-card">
                 <h3>Loan & Vehicle Summary</h3>
@@ -63,7 +63,6 @@ function CustomerProfile({ customerId, setView, onEditCustomer }) {
                 </div>
               </div>
             )}
-            {/* Payment History Table */}
             <div className="profile-card">
                 <h3>Payment History</h3>
                 {payments.length > 0 ? (
@@ -89,7 +88,6 @@ function CustomerProfile({ customerId, setView, onEditCustomer }) {
             </div>
         </div>
         <div className="profile-sidebar">
-            {/* Customer Details Card */}
             <div className="profile-card">
               <h3>Personal Details</h3>
               <p><strong>Mobile:</strong> {customer.mobile_number}</p>
@@ -98,7 +96,6 @@ function CustomerProfile({ customerId, setView, onEditCustomer }) {
               <p><strong>Aadhaar:</strong> {customer.aadhaar_number}</p>
               <p><strong>Address:</strong> {customer.permanent_address}</p>
             </div>
-            {/* Guarantor Details Card */}
             {guarantor && (
                 <div className="profile-card">
                     <h3>Guarantor Details</h3>

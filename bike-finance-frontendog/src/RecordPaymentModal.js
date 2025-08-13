@@ -1,7 +1,8 @@
-// --- RecordPaymentModal Component ---
-// This component is a pop-up form to record a new payment for a loan.
+// --- RecordPaymentModal Component (Deployment Ready) ---
+// This version uses the live API_URL.
 
 import React, { useState } from 'react';
+import API_URL from './apiConfig'; // Import the live API URL
 
 function RecordPaymentModal({ loan, onClose, onPaymentSuccess }) {
   const [amountPaid, setAmountPaid] = useState(parseFloat(loan.emi_amount).toFixed(2));
@@ -15,7 +16,8 @@ function RecordPaymentModal({ loan, onClose, onPaymentSuccess }) {
     setIsError(false);
 
     try {
-      const response = await fetch('/api/payments', {
+      // Use the live API_URL in the fetch call
+      const response = await fetch(`${API_URL}/api/payments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -28,8 +30,8 @@ function RecordPaymentModal({ loan, onClose, onPaymentSuccess }) {
       if (!response.ok) throw new Error(result.message || 'Something went wrong');
 
       setMessage(result.message);
-      onPaymentSuccess(); // This will trigger a refresh of the loan list
-      setTimeout(onClose, 1500); // Close the modal after a short delay
+      onPaymentSuccess();
+      setTimeout(onClose, 1500);
 
     } catch (error) {
       setMessage(error.message);

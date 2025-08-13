@@ -1,5 +1,5 @@
-// --- Bike Finance App - Frontend (Modernized Forms) ---
-// This version redesigns the Add Customer form with a card-based layout.
+// --- Bike Finance App - Frontend (Deployment Ready) ---
+// This version uses the live API_URL in its child components.
 
 import React, { useState } from 'react';
 import CustomerList from './CustomerList';
@@ -11,9 +11,10 @@ import RecoveryNotice from './RecoveryNotice';
 import CustomerProfile from './CustomerProfile';
 import Noc from './Noc';
 import EditCustomerForm from './EditCustomerForm';
+import API_URL from './apiConfig'; // Import the live API URL
 import './App.css';
 
-// --- UPDATED AddCustomerForm component ---
+// AddCustomerForm component is updated to use the live API_URL
 const AddCustomerForm = ({ setView }) => {
   const [formData, setFormData] = useState({ full_name: '', mobile_number: '', email: '', permanent_address: '', current_address: '', aadhaar_number: '', pan_card: '', driving_license: '', occupation: '', monthly_income: '', employer_details: '' });
   const [message, setMessage] = useState('');
@@ -22,7 +23,7 @@ const AddCustomerForm = ({ setView }) => {
   const handleSubmit = async (e) => {
     e.preventDefault(); setMessage(''); setIsError(false);
     try {
-      const response = await fetch('/api/customers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+      const response = await fetch(`${API_URL}/api/customers`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || 'Something went wrong');
       setMessage(result.message);
@@ -61,7 +62,7 @@ const AddCustomerForm = ({ setView }) => {
   );
 };
 
-// Main App component remains the same
+// Main App component
 function App() {
   const [view, setView] = useState('dashboard');
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);

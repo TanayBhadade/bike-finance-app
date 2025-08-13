@@ -1,11 +1,12 @@
-// --- CreateLoanForm Component ---
-// This component displays a form to create a new loan for a specific customer.
+// --- CreateLoanForm Component (Deployment Ready) ---
+// This version uses the live API_URL.
 
 import React, { useState } from 'react';
+import API_URL from './apiConfig'; // Import the live API URL
 
 function CreateLoanForm({ customer, setView }) {
   const [formData, setFormData] = useState({
-    customer_id: customer.id, // Pre-fill the customer ID
+    customer_id: customer.id,
     registration_number: '',
     brand: '',
     model: '',
@@ -30,7 +31,8 @@ function CreateLoanForm({ customer, setView }) {
     setMessage('');
     setIsError(false);
     try {
-      const response = await fetch('/api/loans', {
+      // Use the live API_URL in the fetch call
+      const response = await fetch(`${API_URL}/api/loans`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -38,8 +40,7 @@ function CreateLoanForm({ customer, setView }) {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || 'Something went wrong');
       setMessage(result.message);
-      // On success, go back to the customer list after a short delay
-      setTimeout(() => setView('list'), 2000);
+      setTimeout(() => setView('listLoans'), 2000);
     } catch (error) {
       setMessage(error.message);
       setIsError(true);
@@ -48,21 +49,29 @@ function CreateLoanForm({ customer, setView }) {
 
   return (
     <div className="form-container">
-      <h2>Create Loan for: {customer.full_name}</h2>
-      <form onSubmit={handleSubmit} className="customer-form">
-        <h3>Vehicle Details</h3>
-        <div className="form-group"><label>Registration Number *</label><input type="text" name="registration_number" value={formData.registration_number} onChange={handleInputChange} required /></div>
-        <div className="form-group"><label>Brand *</label><input type="text" name="brand" value={formData.brand} onChange={handleInputChange} required /></div>
-        <div className="form-group"><label>Model *</label><input type="text" name="model" value={formData.model} onChange={handleInputChange} required /></div>
-        <div className="form-group"><label>Engine Number *</label><input type="text" name="engine_number" value={formData.engine_number} onChange={handleInputChange} required /></div>
-        <div className="form-group"><label>Chassis Number *</label><input type="text" name="chassis_number" value={formData.chassis_number} onChange={handleInputChange} required /></div>
-        <div className="form-group"><label>Purchase Date *</label><input type="date" name="purchase_date" value={formData.purchase_date} onChange={handleInputChange} required /></div>
+      <h2>Create Loan for Customer ID: {customer.id}</h2>
+      <form onSubmit={handleSubmit} className="customer-form modern-form">
+        <div className="form-card">
+            <h3>Vehicle Details</h3>
+            <div className="form-grid">
+                <div className="form-group"><label>Registration Number *</label><input type="text" name="registration_number" value={formData.registration_number} onChange={handleInputChange} required /></div>
+                <div className="form-group"><label>Brand *</label><input type="text" name="brand" value={formData.brand} onChange={handleInputChange} required /></div>
+                <div className="form-group"><label>Model *</label><input type="text" name="model" value={formData.model} onChange={handleInputChange} required /></div>
+                <div className="form-group"><label>Engine Number *</label><input type="text" name="engine_number" value={formData.engine_number} onChange={handleInputChange} required /></div>
+                <div className="form-group"><label>Chassis Number *</label><input type="text" name="chassis_number" value={formData.chassis_number} onChange={handleInputChange} required /></div>
+                <div className="form-group"><label>Purchase Date *</label><input type="date" name="purchase_date" value={formData.purchase_date} onChange={handleInputChange} required /></div>
+            </div>
+        </div>
 
-        <h3>Loan Details</h3>
-        <div className="form-group"><label>Total Financed Amount (₹) *</label><input type="number" name="total_financed_amount" value={formData.total_financed_amount} onChange={handleInputChange} required /></div>
-        <div className="form-group"><label>Down Payment Amount (₹) *</label><input type="number" name="down_payment_amount" value={formData.down_payment_amount} onChange={handleInputChange} required /></div>
-        <div className="form-group"><label>Annual Interest Rate (%) *</label><input type="number" step="0.01" name="interest_rate" value={formData.interest_rate} onChange={handleInputChange} required /></div>
-        <div className="form-group"><label>Tenure (Months) *</label><input type="number" name="tenure_months" value={formData.tenure_months} onChange={handleInputChange} required /></div>
+        <div className="form-card">
+            <h3>Loan Details</h3>
+            <div className="form-grid">
+                <div className="form-group"><label>Total Financed Amount (₹) *</label><input type="number" name="total_financed_amount" value={formData.total_financed_amount} onChange={handleInputChange} required /></div>
+                <div className="form-group"><label>Down Payment Amount (₹) *</label><input type="number" name="down_payment_amount" value={formData.down_payment_amount} onChange={handleInputChange} required /></div>
+                <div className="form-group"><label>Annual Interest Rate (%) *</label><input type="number" step="0.01" name="interest_rate" value={formData.interest_rate} onChange={handleInputChange} required /></div>
+                <div className="form-group"><label>Tenure (Months) *</label><input type="number" name="tenure_months" value={formData.tenure_months} onChange={handleInputChange} required /></div>
+            </div>
+        </div>
 
         <button type="submit" className="submit-btn">Create Loan</button>
       </form>

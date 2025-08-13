@@ -1,15 +1,19 @@
-// --- LoanList Component (with Generate NOC button) ---
+// --- LoanList Component (Deployment Ready) ---
+// This version uses the live API_URL.
 
 import React, { useState, useEffect } from 'react';
+import API_URL from './apiConfig'; // Import the live API URL
 
 function LoanList({ onRecordPayment, onGenerateNotice, onViewProfile, onGenerateNoc }) {
   const [loans, setLoans] = useState([]);
   const [error, setError] = useState('');
 
+  // The key prop is used here to force a re-fetch when it changes
   useEffect(() => {
     const fetchLoans = async () => {
       try {
-        const response = await fetch('/api/loans');
+        // Use the live API_URL in the fetch call
+        const response = await fetch(`${API_URL}/api/loans`);
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         setLoans(data);
@@ -19,7 +23,7 @@ function LoanList({ onRecordPayment, onGenerateNotice, onViewProfile, onGenerate
       }
     };
     fetchLoans();
-  }, []);
+  }, []); // This effect runs once when the component mounts
 
   const isOverdue = (dueDate) => {
     if (!dueDate) return false;
